@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Nov 14 20:51:44 MSK 2024
+helloworld-1.0.jar>=
+helloworld-1.0.pom>=

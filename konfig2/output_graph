@@ -1,0 +1,7 @@
+digraph {
+	"com.example:my-artifact:1.0"
+	"org.example:example-library:1.2.3"
+	"com.example":"my-artifact":1.0 -> "org.example":"example-library":1.2.3
+	"com.other:another-library:4.5.6"
+	"com.example":"my-artifact":1.0 -> "com.other":"another-library":4.5.6
+}
