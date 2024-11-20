@@ -1,0 +1,13 @@
+digraph {
+	subgraph cluster_com_example {
+		color=lightgray style=filled
+		com_example
+		com_example_my_lib_1_0
+	}
+	com_example_my_lib_1_0 -> com_example_dependency_lib_2_0
+	subgraph cluster_com_example {
+		color=lightgray style=filled
+		com_example
+		com_example_dependency_lib_2_0
+	}
+}
