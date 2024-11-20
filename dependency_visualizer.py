@@ -3,7 +3,6 @@ import requests
 import xml.etree.ElementTree as ET
 from graphviz import Digraph
 
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Maven Dependency Visualizer")
     parser.add_argument('--graphviz_path', type=str, required=True, help="Path to save the Graphviz file (without extension)")
@@ -15,7 +14,13 @@ def parse_arguments():
 
 def sanitize_label(label):
     """Sanitizes labels for Graphviz compatibility."""
-    return label.replace(':', '\\:').replace('.', '_').replace('-', '_').replace('"', '\\"').replace('\\', '\\\\')
+    label = label.replace(":", "_")   # Replace colon with underscore
+    label = label.replace(".", "_")   # Replace dot with underscore
+    label = label.replace("-", "_")   # Replace dash with underscore
+    label = label.replace(",", "_")   # Replace comma with underscore
+    label = label.replace("\"", "\\\"")  # Escape quotes
+    label = label.replace("\\", "\\\\")  # Escape backslashes
+    return label
 
 
 def fetch_pom(group_id, artifact_id, version, repository_url):
@@ -25,7 +30,7 @@ def fetch_pom(group_id, artifact_id, version, repository_url):
     
     url = f"{repository_url}/{group_id.replace('.', '/')}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
     try:
-        response = requests.get(url, timeout=10)  # Уменьшаем таймаут для ускорения
+        response = requests.get(url, timeout=10)  # Reduced timeout for speed
         response.raise_for_status()
         return response.text
     except requests.exceptions.RequestException as e:
@@ -56,9 +61,22 @@ def build_dependency_graph(graph, group_id, artifact_id, version, repository_url
         return
 
     visited.add((group_id, artifact_id, version))
-    label = sanitize_label(f"{group_id}:{artifact_id}:{version}")
-    graph.node(label)
 
+    # Create label for the package and sanitize it
+    label = sanitize_label(f"{group_id}:{artifact_id}:{version}")
+    
+    # Add a subgraph to represent the "folder" or group (e.g., com.example)
+    group_parts = group_id.split(".")
+    subgraph_name = "_".join(group_parts)  # Create subgraph name like "com_example"
+    
+    with graph.subgraph(name=f"cluster_{subgraph_name}") as c:
+        c.attr(style='filled', color='lightgray')  # Color the folder cluster
+        c.node(f"{subgraph_name}")  # Add the "folder" as a node
+        
+        # Add the actual package node inside the folder cluster
+        c.node(label)
+
+    # Fetch the POM file
     pom_content = fetch_pom(group_id, artifact_id, version, repository_url)
     if not pom_content:
         return
@@ -66,7 +84,9 @@ def build_dependency_graph(graph, group_id, artifact_id, version, repository_url
     dependencies = parse_dependencies(pom_content)
     for dep_group_id, dep_artifact_id, dep_version in dependencies:
         dep_label = sanitize_label(f"{dep_group_id}:{dep_artifact_id}:{dep_version}")
+        # Create edge between current package and its dependency
         graph.edge(label, dep_label)
+        # Recursively build graph for dependencies
         build_dependency_graph(graph, dep_group_id, dep_artifact_id, dep_version, repository_url, depth + 1, max_depth, visited)
 
 
@@ -74,7 +94,7 @@ def main():
     args = parse_arguments()
 
     group_id, artifact_id, version = args.package_name.split(':')
-    graph = Digraph(format='png')  # Генерация PNG по умолчанию
+    graph = Digraph(format='png')  # Generate PNG by default
 
     visited = set()
     build_dependency_graph(graph, group_id, artifact_id, version, args.repository_url, 0, args.max_depth, visited)
@@ -82,11 +102,11 @@ def main():
     output_path = args.graphviz_path
     dot_path = f"{output_path}.dot"
 
-    # Сохраняем .dot файл для проверки
+    # Save the .dot file for inspection
     graph.save(dot_path)
     print(f"Graphviz DOT file saved at: {dot_path}")
 
-    # Генерация PNG
+    # Generate PNG
     try:
         output_file = graph.render(output_path)
         print(f"Dependency graph generated and saved to {output_file}")
