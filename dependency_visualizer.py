@@ -64,19 +64,8 @@ def create_graph_hierarchy(graph, group_id, artifact_id, version):
     graph.node(artifact_node, label=artifact_id, shape="box")
     graph.edge(previous_node, artifact_node)
 
-    # Add specific folders for my_lib and dependency
-    if artifact_id == "my_lib":
-        subfolder_1 = f"{artifact_node}.1.0"
-        graph.node(subfolder_1, label="1.0", shape="box")
-        graph.edge(artifact_node, subfolder_1)
-
-    if artifact_id == "dependency":
-        subfolder_2 = f"{artifact_node}.2.0"
-        graph.node(subfolder_2, label="2.0", shape="box")
-        graph.edge(artifact_node, subfolder_2)
-
-    # Add version node and rank it at the bottom
-    version_node = f"{artifact_node}:{version}"
+    # Add version node explicitly, without treating it as a port
+    version_node = f"{artifact_node}-v{version}"
     graph.node(version_node, label=version, shape="box")
     graph.edge(artifact_node, version_node)
 
