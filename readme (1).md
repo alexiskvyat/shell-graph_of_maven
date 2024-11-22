@@ -1,3 +1,20 @@
+# Постановка задчи
+Разработать инструмент командной строки для визуализации графа
+зависимостей, включая транзитивные зависимости. Сторонние средства для
+получения зависимостей использовать нельзя.
+Зависимости определяются по имени пакета языка Java (Maven). Для
+описания графа зависимостей используется представление Graphviz.
+Визуализатор должен выводить результат на экран в виде графического
+изображения графа.
+Ключами командной строки задаются:
+   - Путь к программе для визуализации графов.
+   - Имя анализируемого пакета.
+   - Максимальная глубина анализа зависимостей.
+   - URL-адрес репозитория.
+Все функции визуализатора зависимостей должны быть покрыты тестами.
+
+---
+
 
 # Dependency Visualizer
 
@@ -39,7 +56,7 @@
 
 Для установки зависимостей Python выполните:
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ---
@@ -47,11 +64,11 @@ pip install -r requirements.txt
 ## **Пример использования**
 ### Запуск программы
 ```bash
-python dependency_visualizer.py \
-    --graphviz_path "/usr/bin/graphviz" \
-    --package_name "org.example:my-package:1.0.0" \
+    python3 dependency_visualizer.py \               
+    --graphviz_path ./output/dependency_graph \
+    --package_name com.example:my-lib:1.0 \
     --max_depth 3 \
-    --repository_url "https://repo.maven.apache.org/maven2/"
+    --repository_url http://localhost:8000
 ```
 
 После выполнения:
@@ -71,7 +88,7 @@ python dependency_visualizer.py \
 
 ### Запуск тестов
 ```bash
-python -m unittest discover tests
+python3 -m unittest test_dependency_visualizer.py
 ```
 
 ---
@@ -82,7 +99,8 @@ python -m unittest discover tests
 - Ребра: связи между пакетами.
 
 Пример визуализации:
-![Пример графа](https://example.com/sample-graph.png)
+<img width="359" alt="image" src="https://github.com/user-attachments/assets/04beb0e5-0654-4bbc-9e2b-fa8439cf8bc4">
+
 
 ---
 
@@ -91,7 +109,4 @@ python -m unittest discover tests
 2. Использование сторонних библиотек для анализа зависимостей не допускается.
 3. Для корректной работы необходимо указать путь к установленному Graphviz.
 
----
 
-## **Контакты**
-Если у вас возникли вопросы или предложения, свяжитесь с автором через раздел **Issues** на GitHub.
