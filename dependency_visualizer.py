@@ -43,21 +43,28 @@ def parse_dependencies(pom_content):
     return dependencies
 
 
-def create_graph_hierarchy(graph, group_id, artifact_id, version):
+def create_graph_hierarchy(graph, group_id, artifact_id, version, is_root=False):
     """
     Creates hierarchical nodes for groupId, artifactId, and version.
+    The `is_root` flag indicates if this is the top-level node (com).
     """
     # Split groupId into folders
     group_parts = group_id.split('.')
     previous_node = None
 
-    # Create nodes for each folder in groupId
-    for i, part in enumerate(group_parts):
-        node_name = ".".join(group_parts[:i + 1])
-        graph.node(node_name, label=part, shape="folder")
-        if previous_node:
-            graph.edge(previous_node, node_name)
+    # If it's the root node (e.g., com), we avoid the usual subfolder creation
+    if is_root:
+        node_name = group_id
+        graph.node(node_name, label=group_id, shape="folder")
         previous_node = node_name
+    else:
+        # Create nodes for each folder in groupId
+        for i, part in enumerate(group_parts):
+            node_name = ".".join(group_parts[:i + 1])
+            graph.node(node_name, label=part, shape="folder")
+            if previous_node:
+                graph.edge(previous_node, node_name)
+            previous_node = node_name
 
     # Add artifactId node
     artifact_node = f"{group_id}.{artifact_id}"
@@ -72,7 +79,7 @@ def create_graph_hierarchy(graph, group_id, artifact_id, version):
     return version_node
 
 
-def build_dependency_graph(graph, group_id, artifact_id, version, repository_url, depth, max_depth, visited):
+def build_dependency_graph(graph, group_id, artifact_id, version, repository_url, depth, max_depth, visited, is_root=False):
     """
     Recursively builds the dependency graph and establishes connections.
     """
@@ -82,7 +89,7 @@ def build_dependency_graph(graph, group_id, artifact_id, version, repository_url
     visited.add((group_id, artifact_id, version))
 
     # Create the graph hierarchy for the current package
-    current_node = create_graph_hierarchy(graph, group_id, artifact_id, version)
+    current_node = create_graph_hierarchy(graph, group_id, artifact_id, version, is_root)
 
     # Fetch the POM and parse dependencies
     pom_content = fetch_pom(group_id, artifact_id, version, repository_url)
@@ -114,7 +121,9 @@ def main():
     graph.attr('node', fontname="Arial", fontsize="12")
 
     visited = set()
-    build_dependency_graph(graph, group_id, artifact_id, version, args.repository_url, 0, args.max_depth, visited)
+
+    # Create the root node (com) with the `is_root` flag set to True
+    build_dependency_graph(graph, group_id, artifact_id, version, args.repository_url, 0, args.max_depth, visited, is_root=True)
 
     output_path = args.graphviz_path
     dot_path = f"{output_path}.dot"
