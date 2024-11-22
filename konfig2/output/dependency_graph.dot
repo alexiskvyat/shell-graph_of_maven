@@ -1,13 +1,16 @@
 digraph {
-	subgraph cluster_com_example {
-		color=lightgray style=filled
-		com_example
-		com_example_my_lib_1_0
-	}
-	com_example_my_lib_1_0 -> com_example_dependency_lib_2_0
-	subgraph cluster_com_example {
-		color=lightgray style=filled
-		com_example
-		com_example_dependency_lib_2_0
-	}
+	dpi=300 rankdir=TB size="20,20"
+	node [fontname=Arial fontsize=12]
+	"com.example" [label="com.example" shape=folder]
+	"com.example.my-lib" [label="my-lib" shape=box]
+	"com.example" -> "com.example.my-lib"
+	"com.example.my-lib-v1.0" [label=1.0 shape=box]
+	"com.example.my-lib" -> "com.example.my-lib-v1.0"
+	com [label=com shape=folder]
+	"com.example" [label=example shape=folder]
+	com -> "com.example"
+	"com.example.dependency-lib" [label="dependency-lib" shape=box]
+	"com.example" -> "com.example.dependency-lib"
+	"com.example.dependency-lib-v2.0" [label=2.0 shape=box]
+	"com.example.dependency-lib" -> "com.example.dependency-lib-v2.0"
 }
